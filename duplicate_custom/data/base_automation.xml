@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="on_create_sale_order_server" model="ir.actions.server">
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="name">[Sale] Create Duplicate SO</field>
+        <field name="state">code</field>
+        <field name="code">
+if record.order_line:
+    archived_product_list=[]
+    for line in record.order_line:
+        if not line.product_template_id.active:
+            archived_product_list.append(line.product_template_id.name)
+    if archived_product_list:
+        raise UserError(f"There are {len(archived_product_list)} Archived product: {', '.join(archived_product_list)}")
+                
+        </field>
+    </record>
+    <record id="on_create_sale_order" model="base.automation">
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="name">[Sale] Create Duplicate SO</field>
+        <field name="trigger">on_create_or_write</field>
+        <field name="action_server_ids" eval="[(6, 0, [ref('duplicate_custom.on_create_sale_order_server')])]"/>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('sale.field_sale_order__create_date')])]"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="on_create_purchase_order_server" model="ir.actions.server">
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="name">[Purchase] Create Duplicate PO</field>
+        <field name="state">code</field>
+        <field name="code">
+if record.order_line:
+    archived_product_list=[]
+    for line in record.order_line:
+        if not line.product_template_id.active:
+            archived_product_list.append(line.product_template_id.name)
+    if archived_product_list:
+        raise UserError(f"There are {len(archived_product_list)} Archived product: {', '.join(archived_product_list)}")
+        </field>
+    </record>
+    <record id="on_create_purchase_order" model="base.automation">
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="name">[Purchase] Create Duplicate PO</field>
+        <field name="trigger">on_create_or_write</field>
+        <field name="action_server_ids" eval="[(6, 0, [ref('duplicate_custom.on_create_purchase_order_server')])]"/>
+        <field name="trigger_field_ids" eval="[(6, 0, [ref('purchase.field_purchase_order__create_date')])]"/>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
